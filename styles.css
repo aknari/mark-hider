@@ -1,0 +1,50 @@
+/* Mark Hider
+   Hides standalone comment markers in the editor (Source mode and Live Preview)
+   when enabled. A CodeMirror 6 StateField scans the document and adds the class
+   "mh-marked" (HTML comments) or "mh-marked-obsidian" (%% comments) to lines
+   whose sole content is a comment matching the configured patterns.
+
+   The CSS below only reacts to those classes, so lines inside fenced code blocks
+   (which render without a .cm-comment child) are never hidden, and comments that
+   do not match any pattern stay visible.
+
+   Lines holding a hidden marker keep a thin accent ribbon as a location cue;
+   hovering the line or placing the caret on it reveals the text. */
+
+/* 1 - Hide comments on lines marked by the pattern scan. */
+body.mh-hidden .cm-line.mh-marked > .cm-comment:only-child {
+  display: none;
+}
+body.mh-hidden .cm-line.mh-marked-obsidian .cm-comment {
+  display: none;
+}
+
+/* 2 - Location cue: a slim ribbon on marked lines that actually render a comment.
+   The second border-left-color declaration is a progressive enhancement for
+   modern Electron (color-mix); older builds fall back to the accent color. */
+body.mh-hidden .cm-line.mh-marked:has(> .cm-comment:only-child),
+body.mh-hidden .cm-line.mh-marked-obsidian:has(.cm-comment) {
+  min-height: 6px;
+  border-left: 3px solid var(--interactive-accent);
+  border-left-color: color-mix(in srgb, var(--interactive-accent) 35%, transparent);
+}
+
+/* 3 - Reveal when the caret is on the line or the mouse hovers it.
+   Both active-line class names are covered (Obsidian's .cm-active and
+   CodeMirror 6's .cm-activeLine). */
+body.mh-hidden .cm-line.mh-marked.cm-active > .cm-comment:only-child,
+body.mh-hidden .cm-line.mh-marked.cm-activeLine > .cm-comment:only-child,
+body.mh-hidden .cm-line.mh-marked:hover > .cm-comment:only-child,
+body.mh-hidden .cm-line.mh-marked-obsidian.cm-active .cm-comment,
+body.mh-hidden .cm-line.mh-marked-obsidian.cm-activeLine .cm-comment,
+body.mh-hidden .cm-line.mh-marked-obsidian:hover .cm-comment {
+  display: inline;
+}
+
+/* Small courtesy hover for the status-bar toggle. */
+.mark-hider-status-item svg {
+  opacity: 0.75;
+}
+.mark-hider-status-item:hover svg {
+  opacity: 1;
+}
