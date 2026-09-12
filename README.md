@@ -22,6 +22,8 @@ Markers are great for delimiting regions (e.g. `<!-- task-consolidator:tasks:sta
 
 ## Installation
 
+See **[INSTALL.md](INSTALL.md)** for the release, source and BRAT paths, and for what the plugin writes into your vault.
+
 **Manual install (no build needed):**
 
 1. Create the folder `.obsidian/plugins/mark-hider/` inside your vault.

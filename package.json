@@ -3,7 +3,7 @@
   "version": "0.2.0",
   "private": true,
   "scripts": {
-    "build": "esbuild src/main.ts --bundle --external:obsidian --external:@codemirror/state --external:@codemirror/view --format=cjs --platform=browser --target=es2020 --outfile=main.js",
+    "build": "esbuild src/main.ts --bundle --external:obsidian --external:@codemirror/state --external:@codemirror/view --format=cjs --platform=browser --target=es2020 --outfile=../../.obsidian/plugins/mark-hider/main.js",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
