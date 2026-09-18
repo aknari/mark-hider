@@ -1,3 +1,7 @@
+---
+created: 2026-09-02T18:45
+updated: 2026-09-18T09:54
+---
 # Mark Hider
 
 **Author:** [T. Bautista](https://github.com/aknari)
@@ -34,7 +38,8 @@ See **[INSTALL.md](INSTALL.md)** for the release, source and BRAT paths, and for
 
 ```bash
 npm install
-npm run build   # compiles and copies main.js into .obsidian/plugins/mark-hider/
+npm run build   # compiles into dist/
+npm run deploy  # build, then copy dist/ into .obsidian/plugins/mark-hider/
 ```
 
 ## Usage
@@ -88,7 +93,8 @@ No DOM mutation of the editor, no file writes, no dependency on any particular m
 ```bash
 npm install
 npm run typecheck   # tsc --noEmit
-npm run build       # bundles src/main.ts into .obsidian/plugins/mark-hider/main.js
+npm run build       # bundles src/main.ts and styles.css into dist/
+npm run deploy      # build, then copy dist/ into .obsidian/plugins/mark-hider/
 ```
 
 ## License

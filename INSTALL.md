@@ -1,3 +1,7 @@
+---
+created: 2026-09-12T19:57
+updated: 2026-09-18T09:54
+---
 # Installing Mark Hider
 
 This plugin is not in Obsidian's community plugin list. Install it manually, from a
@@ -35,14 +39,21 @@ git clone https://github.com/aknari/mark-hider
 cd mark-hider
 npm install
 npm run typecheck
-npm run build
+npm run build       # bundles into dist/
+npm run deploy      # build, then copy dist/ into a vault's plugin folder
 ```
 
-`npm run build` writes `main.js` straight into `.obsidian/plugins/mark-hider/` of the
-repository's **parent** vault. That is why the build assumes the repo lives inside a
-vault (for example `<vault>/80-support/mark-hider/`). `manifest.json` and `styles.css`
-are already in the repository root, so copy them next to the built `main.js` if you keep
-the repo elsewhere. There is no test suite yet, so no `npm test`.
+`npm run build` writes into `dist/` and touches nothing else, so the build does not depend
+on where the repository sits. `npm run deploy` copies `dist/main.js`, `dist/styles.css` and
+`manifest.json` into a vault's plugin folder: the `../../.obsidian/plugins/mark-hider/` of
+the vault the source lives in (`<vault>/80-support/mark-hider/`), or, for a repository kept
+anywhere else, wherever `OBSIDIAN_PLUGIN_DIR` points:
+
+```bash
+OBSIDIAN_PLUGIN_DIR=~/my-vault/.obsidian/plugins/mark-hider npm run deploy
+```
+
+There is no test suite yet, so no `npm test`.
 
 ## Option 3 — BRAT (auto-updates)
 
