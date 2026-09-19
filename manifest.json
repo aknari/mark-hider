@@ -1,9 +1,9 @@
 {
   "id": "mark-hider",
   "name": "Mark Hider",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "minAppVersion": "1.8.0",
-  "description": "Hide standalone HTML comment markers matching configurable patterns, and optionally every Obsidian %% comment, with a status-bar toggle, a subtle line indicator, and reveal on hover or caret.",
+  "description": "Hide standalone HTML comment markers matching configurable patterns, optionally every Obsidian %% comment and the frontmatter properties block, with a status-bar toggle, a subtle line indicator, and reveal on hover or caret.",
   "author": "T. Bautista",
   "isDesktopOnly": false
 }

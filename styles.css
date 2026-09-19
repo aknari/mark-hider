@@ -9,7 +9,11 @@
    do not match any pattern stay visible.
 
    Lines holding a hidden marker keep a thin accent ribbon as a location cue;
-   hovering the line or placing the caret on it reveals the text. */
+   hovering the line or placing the caret on it reveals the text.
+
+   The properties block is hidden as a whole and opt-in: the container Obsidian
+   draws for it is caught by its class, under "mh-hide-properties", which the
+   plugin only sets while the status-bar switch is on and the setting is on. */
 
 /* 1 - Hide comments on lines marked by the pattern scan. */
 body.mh-hidden .cm-line.mh-marked > .cm-comment:only-child {
@@ -39,6 +43,25 @@ body.mh-hidden .cm-line.mh-marked-obsidian.cm-active .cm-comment,
 body.mh-hidden .cm-line.mh-marked-obsidian.cm-activeLine .cm-comment,
 body.mh-hidden .cm-line.mh-marked-obsidian:hover .cm-comment {
   display: inline;
+}
+
+/* 4 - Properties block (opt-in): the whole frontmatter section disappears, the
+   "Properties" heading included, since that heading is drawn inside the block.
+   Two rules, one per place that draws it:
+   - Live Preview, pinned with .is-live-preview on purpose: in Source mode
+     Obsidian does not draw the block at all (it shows the raw YAML), and that
+     mode is meant to show everything as written, so it is left alone;
+   - Reading view, which renders its own copy into a .metadata-container.
+   Both are scoped to markdown views, so the "All properties" pane of the core
+   Properties plugin is never affected.
+
+   "!important" is needed, not lazy: Obsidian shows the block with
+   `.markdown-source-view.is-live-preview.show-properties .metadata-container:not(.mod-error)`
+   — five classes, more than any selector worth writing here — so a plain rule
+   would simply lose whenever the core setting has the properties on display. */
+body.mh-hide-properties .markdown-source-view.is-live-preview .metadata-container,
+body.mh-hide-properties .markdown-preview-view .metadata-container {
+  display: none !important;
 }
 
 /* Small courtesy hover for the status-bar toggle. */

@@ -8,7 +8,7 @@ updated: 2026-09-18T09:54
 
 Hide standalone comment markers in the Obsidian editor with one click, without ever touching your files.
 
-Markers are great for delimiting regions (e.g. `<!-- task-consolidator:tasks:start -->`), but they clutter the editor. **Mark Hider** hides the standalone HTML comments (`<!-- ... -->`) that match the patterns you configure, and can optionally hide **every** Obsidian `%% ... %%` comment. Hidden lines keep a subtle location cue, and the text reappears the moment you need it: when the caret is on the line or you hover it.
+Markers are great for delimiting regions (e.g. `<!-- task-consolidator:tasks:start -->`), but they clutter the editor. **Mark Hider** hides the standalone HTML comments (`<!-- ... -->`) that match the patterns you configure, and can optionally hide **every** Obsidian `%% ... %%` comment and the **properties block** at the top of a note — the frontmatter together with its *Properties* heading. Hidden marker lines keep a subtle location cue, and their text reappears the moment you need it: when the caret is on the line or you hover it.
 
 ## Features
 
@@ -18,6 +18,7 @@ Markers are great for delimiting regions (e.g. `<!-- task-consolidator:tasks:sta
   - **Regex** — JavaScript regular expression (invalid regexes are ignored).
   - An HTML comment is hidden when it is the **sole content of its line** and **any enabled pattern** matches. Empty or fully disabled pattern list = nothing hidden.
 - **Obsidian `%%` comments (optional, all-or-nothing).** The *Hide all Obsidian %% comments* toggle hides **every** standalone `%% ... %%` comment, regardless of patterns — Obsidian's native comments are annotations, not markers, so selective hiding rarely makes sense for them. Patterns only govern `<!-- -->` comments.
+- **Properties block (optional).** *Hide the properties block* hides the whole frontmatter section at the top of a note, heading included, in Live Preview and Reading view — Source mode is deliberately left alone, because there Obsidian shows the raw YAML instead of the block, and showing everything as written is what that mode is for. It follows the same status-bar switch, so a single click brings it back whenever you need to read or edit a property (say, to review the tags another plugin proposed). Nothing is written to your notes: hiding is purely visual.
 - **Format-agnostic.** The plugin does not care which plugin wrote the marker — any standalone HTML comment matching your patterns is hidden (e.g. `task-consolidator:*`, `operon:*`, whatever you need).
 - **Only standalone markers are hidden.** A comment is hidden only when it is the sole content of its line (`:only-child`). Comments inside fenced code blocks are never touched.
 - **Location cue.** Each hidden marker keeps a thin accent ribbon on the left edge of its line, so sections delimited by markers stay visually distinguishable from ordinary blank lines.
@@ -48,7 +49,7 @@ npm run deploy  # build, then copy dist/ into .obsidian/plugins/mark-hider/
 |---|---|
 | Status bar (eye icon) | Click to toggle hiding on/off. |
 | Command palette | `Mark Hider: Toggle marker hiding`. |
-| Settings → Mark Hider | Master toggle, the *Hide all Obsidian %% comments* toggle, and the pattern list. |
+| Settings → Mark Hider | Master toggle, the *Hide all Obsidian %% comments* toggle, the *Hide the properties block* toggle, and the pattern list. |
 
 ### Patterns
 
@@ -70,7 +71,7 @@ Rules (these only apply to `<!-- -->` comments; the `%%` toggle is all-or-nothin
 
 ## How it works
 
-A CodeMirror 6 `StateField` scans the document on every change and marks matching comment lines with a class (`mh-marked`, or `mh-marked-obsidian` for `%%` comments); the bundled `styles.css` then hides, ribbons, and reveals those lines:
+A CodeMirror 6 `StateField` scans the document on every change and marks matching comment lines with a class (`mh-marked`, or `mh-marked-obsidian` for `%%` comments). The bundled `styles.css` then hides, ribbons, and reveals those lines:
 
 ```css
 body.mh-hidden .cm-line.mh-marked > .cm-comment:only-child { display: none; }
@@ -80,9 +81,11 @@ body.mh-hidden .cm-line.mh-marked.cm-activeLine > .cm-comment:only-child,
 body.mh-hidden .cm-line.mh-marked:hover > .cm-comment:only-child {
   display: inline; /* revealed on caret / hover */
 }
+body.mh-hide-properties .markdown-source-view.is-live-preview .metadata-container,
+body.mh-hide-properties .markdown-preview-view .metadata-container { display: none !important; }
 ```
 
-No DOM mutation of the editor, no file writes, no dependency on any particular marker format. `@codemirror/state` and `@codemirror/view` are marked as external in the build and resolved from the copy Obsidian ships.
+The properties block lives under its own body class (`mh-hide-properties`), enabled from the settings while the status-bar switch keeps everything in step: nothing is hidden while it is off. The `!important` is there because Obsidian shows that container with a five-class selector (`.markdown-source-view.is-live-preview.show-properties …`), so a plain rule would lose. No DOM mutation of the editor, no file writes, no dependency on any particular marker format. `@codemirror/state` and `@codemirror/view` are marked as external in the build and resolved from the copy Obsidian ships.
 
 ## Requirements
 

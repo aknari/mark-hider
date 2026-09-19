@@ -14,18 +14,21 @@ interface MarkerPattern {
 interface MarkHiderSettings {
   hideMarkers: boolean;
   hideObsidianComments: boolean;
+  hideProperties: boolean;
   patterns: MarkerPattern[];
 }
 
 const DEFAULT_SETTINGS: MarkHiderSettings = {
   hideMarkers: true,
   hideObsidianComments: false,
+  hideProperties: false,
   patterns: [
     { id: "example-tc", text: "task-consolidator", mode: "contains", enabled: true },
   ],
 };
 
 const BODY_CLASS = "mh-hidden";
+const PROPERTIES_BODY_CLASS = "mh-hide-properties";
 
 const HTML_COMMENT_RE = /^\s*<!--\s*([\s\S]*?)\s*-->\s*$/;
 const OBSIDIAN_COMMENT_RE = /^\s*%%\s*([\s\S]*?)\s*%%\s*$/;
@@ -113,6 +116,7 @@ export default class MarkHiderPlugin extends Plugin {
     currentMatcher = null;
     currentIncludeObsidian = false;
     document.body.classList.remove(BODY_CLASS);
+    document.body.classList.remove(PROPERTIES_BODY_CLASS);
   }
 
   async saveSettings(): Promise<void> { await this.saveData(this.settings); }
@@ -127,8 +131,11 @@ export default class MarkHiderPlugin extends Plugin {
     }
   }
 
+  /** The status-bar switch is the master: while it is off, nothing is hidden. */
   applyState(): void {
-    document.body.classList.toggle(BODY_CLASS, this.settings.hideMarkers);
+    const hiding = this.settings.hideMarkers;
+    document.body.classList.toggle(BODY_CLASS, hiding);
+    document.body.classList.toggle(PROPERTIES_BODY_CLASS, hiding && this.settings.hideProperties);
   }
 
   /** Redraws the status-bar toggle to reflect the current state. */
@@ -138,11 +145,12 @@ export default class MarkHiderPlugin extends Plugin {
     try {
       setIcon(this.statusBarItem, this.settings.hideMarkers ? "eye-off" : "eye");
     } catch {
-      this.statusBarItem.setText(this.settings.hideMarkers ? "Marks: hidden" : "Marks: shown");
+      this.statusBarItem.setText(this.settings.hideMarkers ? "Hidden" : "Shown");
     }
+    const what = this.settings.hideProperties ? "Markers and properties" : "Markers";
     const label = this.settings.hideMarkers
-      ? "Markers hidden — click to show"
-      : "Markers shown — click to hide";
+      ? `${what} hidden — click to show`
+      : `${what} shown — click to hide`;
     this.statusBarItem.setAttribute("aria-label", label);
     this.statusBarItem.setAttribute("title", label);
   }
@@ -166,7 +174,8 @@ class MarkHiderSettingTab extends PluginSettingTab {
       .setDesc(
         "Hides standalone comments (alone on a line) that match one of the patterns below, in Source mode and Live Preview. " +
         "Comments inside code blocks are never hidden. Lines whose marker is hidden keep a subtle ribbon as a location cue; " +
-        "hover the line or place the caret on it to reveal the text. Markers are always hidden in Reading view by Obsidian itself."
+        "hover the line or place the caret on it to reveal the text. Markers are always hidden in Reading view by Obsidian itself. " +
+        "The properties block below follows this same switch."
       )
       .addToggle((toggle) => toggle.setValue(this.plugin.settings.hideMarkers).onChange(async (value) => {
         this.plugin.settings.hideMarkers = value;
@@ -180,6 +189,19 @@ class MarkHiderSettingTab extends PluginSettingTab {
       .addToggle((toggle) => toggle.setValue(this.plugin.settings.hideObsidianComments).onChange(async (value) => {
         this.plugin.settings.hideObsidianComments = value;
         this.plugin.recompileMatcher();
+        await this.plugin.saveSettings();
+      }));
+    new Setting(containerEl)
+      .setName("Hide the properties block")
+      .setDesc(
+        "Hides the whole frontmatter section at the top of a note — the properties and their \"Properties\" heading, which is drawn inside the same block. " +
+        "It works in Live Preview and in Reading view, and follows the status-bar switch: while it is on you cannot see or edit a property, " +
+        "so click the switch whenever you need to (e.g. to review the tags a plugin proposed). Source mode is left alone, because there Obsidian shows the raw YAML on purpose. " +
+        "Nothing is written to your notes either way."
+      )
+      .addToggle((toggle) => toggle.setValue(this.plugin.settings.hideProperties).onChange(async (value) => {
+        this.plugin.settings.hideProperties = value;
+        this.plugin.applyState();
         await this.plugin.saveSettings();
       }));
     containerEl.createEl("h3", { text: "Marker patterns" });
